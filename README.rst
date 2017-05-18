@@ -64,5 +64,7 @@ sure to select the compatible Windows XP toolchain in the project properties!
 Credits
 =======
 
-Thanks to @wiskitki who spotted the ``CryptReleaseContext`` issue with Windows
-10 (which actually wipe the primes in memory).
+* @wiskitki who spotted the ``CryptReleaseContext`` issue with Windows 10 (which actually wipe the primes in memory).
+* @hackerfantastic for releasing the sample I used
+* Miasm (https://github.com/cea-sec/miasm) for its help extracting the DLL and reversing the whole thing
+* Wine sources for the Windows RSA private key format.
