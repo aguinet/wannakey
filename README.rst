@@ -10,6 +10,24 @@ to work, your computer must not have been rebooted after being infected.
 Please also note that you need some luck for this to work (see below), and so
 it might not work in every cases!
 
+Updates
+=======
+
+v0.2
+----
+
+* The generated private RSA key had invalid computed fields, which made the key
+  not importable with CryptImportKey under Windows XP (fixed). wannafork can
+  now be used directly from XP.
+
+* Updated the binary with this fix and a static build (no need for the MSVC
+  runtime anymore)
+
+v0.1
+----
+
+* Original version
+
 Introduction
 ============
 
@@ -51,9 +69,7 @@ Once you've got this, launch using ``cmd.exe``:
 If a valid prime is found in memory, the ``priv.key`` file will be generated in
 the current directory.
 
-You can then use https://github.com/odzhan/wanafork/ to decrypt your files!
-
-**WARNING**: wanafork does not work directly for now directly under Windows XP. This should be fixed soon (hopefully)!
+You can then use https://github.com/odzhan/wanafork/ to decrypt your files! (working on XP!)
 
 Compile from source
 ===================

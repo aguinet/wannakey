@@ -143,7 +143,9 @@ static void writeIntegerToFile(FILE* f, BigIntTy const& N, DWORD padSize)
 	auto NData = getDataFromInteger(N);
 	// Padding with zeros
 	NData.resize(padSize);
-	fwrite(&NData[0], 1, NData.size(), f);
+	if (fwrite(&NData[0], 1, NData.size(), f) != NData.size()) {
+		std::cerr << "Error while writing!" << std::endl;
+	}
 }
 
 // Adapted from https://rosettacode.org/wiki/Modular_inverse#C.2B.2B
@@ -173,7 +175,7 @@ static bool genRSAKey(BigIntTy const& N, BigIntTy const& P, DWORD PrimeSize, con
 	header.bType = 7;
 	header.bVersion = 2;
 	header.reserved = 0;
-	header.aiKeyAlg = 0xa400;
+	header.aiKeyAlg = 0x0000a400;
 	fwrite(&header, 1, sizeof(BLOBHEADER), f);
 
 	auto const e = 0x10001;
@@ -185,12 +187,12 @@ static bool genRSAKey(BigIntTy const& N, BigIntTy const& P, DWORD PrimeSize, con
 	fwrite(&pubKey, 1, sizeof(RSAPUBKEY), f);
 
 	// Thanks to the wine source code for this format!
-	auto const Q = N / P;
-	auto const Phi = boost::multiprecision::lcm(P - 1, Q - 1);
-	auto const d = mulInv(e, Phi);
-	auto const dP = d % (P - 1);
-	auto const dQ = d % (Q - 1);
-	auto const iQ = mulInv(Q, P);
+	BigIntTy const Q = N / P;
+	BigIntTy const Phi = boost::multiprecision::lcm(P - 1, Q - 1);
+	BigIntTy const d = mulInv(e, Phi);
+	BigIntTy const dP = d % (P - 1);
+	BigIntTy const dQ = d % (Q - 1);
+	BigIntTy const iQ = mulInv(Q, P);
 	writeIntegerToFile(f, N, PrimeSize *2);
 	writeIntegerToFile(f, P, PrimeSize);
 	writeIntegerToFile(f, Q, PrimeSize);
@@ -280,8 +282,7 @@ int main(int argc, char** argv)
 		if (P != 0) {
 			// Generate the private key
 			std::cout << "Generating the private key in 'priv.key'..." << std::endl;
-			genRSAKey(N, P, subkeyLen, "priv.key");
-		
+			genRSAKey(N, P, subkeyLen, "priv.key");		
 			std::cout << "Done! You can now decrypt your files!" << std::endl;
 			ret = 0;
 			break;
