@@ -17,7 +17,7 @@ v0.2
 ----
 
 * The generated private RSA key had invalid computed fields, which made the key
-  not importable with CryptImportKey under Windows XP (fixed). wannafork can
+  not importable with CryptImportKey under Windows XP (fixed). wanafork and/or wanadecrypt can
   now be used directly from XP.
 
 * Updated the binary with this fix and a static build (no need for the MSVC
@@ -69,7 +69,9 @@ Once you've got this, launch using ``cmd.exe``:
 If a valid prime is found in memory, the ``priv.key`` file will be generated in
 the current directory.
 
-You can then use https://github.com/odzhan/wanafork/ to decrypt your files! (working on XP!)
+You can then use https://github.com/odzhan/wanafork/ or
+https://github.com/gentilkiwi/wanadecrypt to decrypt your files! (working on
+XP!)
 
 Compile from source
 ===================
