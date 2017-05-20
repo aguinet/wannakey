@@ -4,8 +4,8 @@ Wannakey
 WARNING
 =======
 
-This software has only been tested and known to work under Windows XP. In order
-to work, your computer must not have been rebooted after being infected.
+This software has only been tested and known to work under Windows XP, 7 x86,
+2003, Vista and Windows Server 2008 (tests by @msuiche).
 
 Please also note that you need some luck for this to work (see below), and so
 it might not work in every cases!
