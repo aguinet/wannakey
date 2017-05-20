@@ -18,6 +18,13 @@ DISCLAMER
 Updates
 =======
 
+v2.0
+----
+
+* automatically find the encryption process PID
+* write the private key so that the original malware's process can decrypt the files (using the Decrypt button)
+* code refactoring and cmake usage
+
 v0.2
 ----
 
@@ -61,28 +68,29 @@ That's what this software tries to achieve.
 Usage
 =====
 
-You can use the binary in the bin/ folder. You first need to find the PID of
-the ``wcry.exe`` process using the Task Manager, and locate the
-``00000000.pky`` file.
+You can use the binary in the bin/ folder. It will locate the encryption PID by
+itself. If it can't, you might need to search it by hand and pass it as an
+argument of the ``wannakey.exe`` tool.o
 
-Once you've got this, launch using ``cmd.exe``:
-
-.. code::
-
-   > search_primes.exe PID path\to\00000000.pky
-
-If a valid prime is found in memory, the ``priv.key`` file will be generated in
-the current directory.
-
-You can then use https://github.com/odzhan/wanafork/ or
-https://github.com/gentilkiwi/wanadecrypt to decrypt your files! (working on
-XP!)
+If the key had been succeesfully generated, you will just need to use the
+"Decrypt" button of the malware to decrypt your files!
 
 Compile from source
 ===================
 
-You can use Visual Studio 2015 express to compile the associated project. Be
-sure to select the compatible Windows XP toolchain in the project properties!
+You need at least Visual Studio 2015 express and CMake.
+
+Launch a VS2015 Native Tools command line prompt and run:
+
+.. code::
+
+  > cd /path/to/wannakey/wannakey/
+  > mkdir build
+  > cd build
+  > cmake -G "Visual Studio 14 2015" -T "v140_xp" ..
+  > cmake --build . --config "release"
+
+Binary will be in the src/Release directory.
 
 Credits
 =======
