@@ -8,7 +8,7 @@ This software has only been tested and known to work under Windows XP. In order
 to work, your computer must not have been rebooted after being infected.
 
 Please also note that you need some luck for this to work (see below), and so
-it might not work in every cases!
+it might not work in every case!
 
 Updates
 =======
