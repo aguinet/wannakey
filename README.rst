@@ -10,6 +10,11 @@ This software has only been tested and known to work under Windows XP, 7 x86,
 Please also note that you need some luck for this to work (see below), and so
 it might not work in every case!
 
+DISCLAMER
+=========
+
+- This code is and will always be GPLv3. See LICENSE file attached.
+
 Updates
 =======
 
