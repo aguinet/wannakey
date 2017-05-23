@@ -75,6 +75,18 @@ argument of the ``wannakey.exe`` tool.o
 If the key had been succeesfully generated, you will just need to use the
 "Decrypt" button of the malware to decrypt your files!
 
+Windows Crytp API leak check
+============================
+
+A tool named "winapi_check" (see the bin/ directory) checks whether the Windows
+Crypto API remove the private key's primes from memory or not. This allows to
+verify if wannakey has a small chance or not to work.
+
+Please note that, even this tool says wannakey stands a chance, it doesn't mean
+it will work!
+
+If you have tried this tool, please report the results here: https://github.com/aguinet/wannakey/issues/5.
+
 Compile from source
 ===================
 

@@ -26,6 +26,7 @@ void dumpHex(const char* Name, uint8_t const* Data, size_t const Len);
 double normalizedEntropy(uint8_t const* Data, const size_t Len);
 std::vector<uint8_t> readFile(const char* path, std::error_code& EC);
 bool fileHasString(const char* path, const char* str);
+uint8_t const* memmem(const uint8_t *haystack, size_t hlen, const uint8_t *needle, size_t nlen);
 
 std::error_code getLastEC();
 std::string getLastErrorMsg();

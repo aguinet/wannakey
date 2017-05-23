@@ -8,4 +8,5 @@ project(wannakey)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/third-party)
 
-add_subdirectory(src)
+add_subdirectory(wkey)
+add_subdirectory(tools)

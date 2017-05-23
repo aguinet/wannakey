@@ -108,11 +108,6 @@ int main(int argc, char** argv)
   std::string const public_key = wcry_path +"\\00000000.pky";
 
   std::cout << "Using PID " << pid << " and working directory " << wcry_path << "..." << std::endl;
-  HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
-  if (hProc == NULL) {
-    std::cerr << "Unable to open process " << pid << ": " << getLastErrorMsg() << std::endl;
-    return 1;
-  }
 
   std::cout << "Reading public key from " << public_key << "..." << std::endl;
   std::error_code EC;
@@ -140,48 +135,27 @@ int main(int argc, char** argv)
   dumpHex("N", &keyData[idx], keyLen);
   const auto N = getInteger(&keyData[idx], keyLen);
 
-  MEMORY_BASIC_INFORMATION MemInfo;
-
   // Search for primes of subkeyLen bits, and check if they factor N!
-  uint8_t* CurAddr = 0;
-  const size_t PageSize = 4096;
-  std::vector<uint8_t> Buf;
   SetPrimes Primes;
   int ret = 1;
-  while ((uintptr_t)CurAddr < 0x80000000) {
-    if (!VirtualQueryEx(hProc, CurAddr, &MemInfo, sizeof(MEMORY_BASIC_INFORMATION))) {
-      CurAddr += PageSize;
-      continue;
-    }
-    CurAddr += MemInfo.RegionSize;
-
-    if (MemInfo.Type != MEM_PRIVATE || MemInfo.State == MEM_RESERVE || MemInfo.Protect != PAGE_READWRITE) {
-      continue;
+  auto Err = walkProcessPrivateRWMemory(pid, [&] (uint8_t const* Buf, const size_t Size) {
+    const auto P = searchPrimes(Buf, Size, Primes, N, subkeyLen);
+    if (P == 0) {
+      return true;
     }
 
-    printf("Pages: %p - %p\n", MemInfo.BaseAddress, (uint8_t*)MemInfo.BaseAddress + MemInfo.RegionSize);
+    // Generate the private key
+    std::string const pkeyPath = wcry_path + "\\" + "00000000.dky";
+    std::cout << "Generating the private key in '" << pkeyPath << "'..." << std::endl;
+    genRSAKey(N, P, subkeyLen, pkeyPath.c_str());
+    std::cout << "Done! You can now decrypt your files with the \"official\" decryptor interface by clicking on the \"Decrypt\" button!" << std::endl;
+    ret = 0;
+    return false;
+  });
 
-    // Gather memory from remote process
-    const size_t Size = MemInfo.RegionSize;
-    SIZE_T ReadSize;
-    Buf.resize(Size);
-    if (!ReadProcessMemory(hProc, MemInfo.BaseAddress, &Buf[0], Size, &ReadSize)) {
-      std::cerr << "Error reading process memory: " << getLastErrorMsg() << std::endl;
-      return 1;
-    }
-    if (ReadSize != Size) {
-      std::cerr << "Warninng: ReadProcessMemory returned only " << ReadSize << " bytes when asked for " << Size << std::endl;
-    }
-    const auto P = searchPrimes(&Buf[0], ReadSize, Primes, N, subkeyLen);
-    if (P != 0) {
-      // Generate the private key
-      std::string const pkeyPath = wcry_path + "\\" + "00000000.dky";
-      std::cout << "Generating the private key in '" << pkeyPath << "'..." << std::endl;
-      genRSAKey(N, P, subkeyLen, pkeyPath.c_str());
-      std::cout << "Done! You can now decrypt your files with the \"official\" decryptor interface by clicking on the \"Decrypt\" button!" << std::endl;
-      ret = 0;
-      break;
-    }
+  if (Err) {
+    std::cerr << "Error while reading process " << pid << " memory: " << Err.message() << std::endl;
+    return 1;
   }
 
   if (ret == 1) {

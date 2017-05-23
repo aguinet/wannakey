@@ -82,28 +82,50 @@ std::error_code getLastEC()
   return std::error_code{ (int)GetLastError(), std::system_category() };
 }
 
-// From http://stackoverflow.com/questions/2188914/c-searching-for-a-string-in-a-file
-static void *memmem(const uint8_t *haystack, size_t hlen, const uint8_t *needle, size_t nlen)
+uint8_t const* memmem(const uint8_t *haystack, size_t hlen, const uint8_t *needle, size_t nlen)
 {
-  int needle_first;
-  const uint8_t *p = haystack;
-  size_t plen = hlen;
+	if (nlen == 0) {
+		return NULL;
+	}
+	uint8_t const* curPtr = haystack;
+	uint8_t const* const endPtr = haystack + hlen;
+	uint8_t const firstByte = *needle;
+	do {
+		curPtr = std::find(curPtr, endPtr, firstByte);
+		if (curPtr < endPtr) {
+			if (((uintptr_t)endPtr-(uintptr_t)curPtr) < nlen) {
+				return nullptr;
+			}
+			if (memcmp(curPtr, needle, nlen) == 0) {
+				return curPtr;
+			}
+		}
+		++curPtr;
+	} while (curPtr < endPtr);
 
-  if (!nlen)
-    return NULL;
+	return nullptr;
 
-  needle_first = *(unsigned char *)needle;
+#if 0
+	int needle_first;
+	const uint8_t *p = haystack;
+	size_t plen = hlen;
 
-  while (plen >= nlen && (p = (const uint8_t*)memchr(p, needle_first, plen - nlen + 1)))
-  {
-    if (!memcmp(p, needle, nlen))
-      return (void *)p;
+	if (!nlen)
+		return NULL;
 
-    p++;
-    plen = hlen - (p - haystack);
-  }
+	needle_first = *(unsigned char *)needle;
 
-  return NULL;
+	while (plen >= nlen && (p = (const uint8_t*)memchr(p, needle_first, plen - nlen + 1)))
+	{
+		if (!memcmp(p, needle, nlen))
+			return (void *)p;
+
+		p++;
+		plen = hlen - (p - haystack);
+	}
+
+	return NULL;
+#endif
 }
 
 
