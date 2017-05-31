@@ -21,8 +21,8 @@ Updates
 v2.1
 ----
 
-* optimization of the prime search process (see TODO).
-* OpenMP version that uses has many core as available to speed-up the process
+* optimization of the prime search process (see https://github.com/aguinet/wannakey/issues/2).
+* OpenMP version that uses as many core as available to speed-up the process
 * tool that finds whether wannakey's technique has chances to work on a running Windows OS
 
 v2.0
