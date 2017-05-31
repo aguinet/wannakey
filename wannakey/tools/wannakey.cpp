@@ -136,10 +136,9 @@ int main(int argc, char** argv)
   const auto N = getInteger(&keyData[idx], keyLen);
 
   // Search for primes of subkeyLen bits, and check if they factor N!
-  SetPrimes Primes;
   int ret = 1;
   auto Err = walkProcessPrivateRWMemory(pid, [&] (uint8_t const* Buf, const size_t Size) {
-    const auto P = searchPrimes(Buf, Size, Primes, N, subkeyLen);
+    const auto P = searchPrimes(Buf, Size, N, subkeyLen);
     if (P == 0) {
       return true;
     }

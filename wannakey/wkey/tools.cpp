@@ -16,13 +16,18 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 
 #include <array>
 #include <iostream>
 #include <cstdint>
 #include <cstdio>
 #include <string>
+#include <cmath>
+#include <algorithm>
+#include <memory.h>
 
 #include <wkey/tools.h>
 
@@ -72,6 +77,7 @@ std::error_code getLastErrno()
   return std::error_code{ errno, std::system_category() };
 }
 
+#ifdef _WIN32
 std::string getLastErrorMsg()
 {
   return getLastEC().message();
@@ -81,6 +87,7 @@ std::error_code getLastEC()
 {
   return std::error_code{ (int)GetLastError(), std::system_category() };
 }
+#endif
 
 uint8_t const* memmem(const uint8_t *haystack, size_t hlen, const uint8_t *needle, size_t nlen)
 {
@@ -104,28 +111,6 @@ uint8_t const* memmem(const uint8_t *haystack, size_t hlen, const uint8_t *needl
 	} while (curPtr < endPtr);
 
 	return nullptr;
-
-#if 0
-	int needle_first;
-	const uint8_t *p = haystack;
-	size_t plen = hlen;
-
-	if (!nlen)
-		return NULL;
-
-	needle_first = *(unsigned char *)needle;
-
-	while (plen >= nlen && (p = (const uint8_t*)memchr(p, needle_first, plen - nlen + 1)))
-	{
-		if (!memcmp(p, needle, nlen))
-			return (void *)p;
-
-		p++;
-		plen = hlen - (p - haystack);
-	}
-
-	return NULL;
-#endif
 }
 
 

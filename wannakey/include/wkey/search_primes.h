@@ -24,8 +24,7 @@
 
 namespace wkey {
 
-typedef std::set<BigIntTy> SetPrimes;
-BigIntTy searchPrimes(uint8_t const* Data, size_t const Len, SetPrimes& Primes, BigIntTy const& N, const size_t PrimeSize);
+BigIntTy searchPrimes(uint8_t const* Data, size_t const Len, BigIntTy const& N, const size_t PrimeSize);
 
 } // wkey
 

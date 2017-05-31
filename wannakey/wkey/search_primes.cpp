@@ -15,38 +15,82 @@
 // along with wannakey.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <set>
+#include <atomic>
+
+#ifdef HAS_OMP_SUPPORT
+#include <omp.h>
+#endif
 
 #include <wkey/bigint.h>
 #include <wkey/search_primes.h>
 #include <wkey/tools.h>
 
 #define PALIGN 4
-wkey::BigIntTy wkey::searchPrimes(uint8_t const* Data, size_t const Len, SetPrimes& Primes, BigIntTy const& N, const size_t PrimeSize)
+#define MINIMAL_ENTROPY 0.8
+
+using namespace wkey;
+
+#ifdef HAS_OMP_SUPPORT
+static BigIntTy searchPrimes_omp(uint8_t const* Data, size_t const Len, BigIntTy const& N, const size_t PrimeSize)
 {
   if (Len < PrimeSize) {
     return 0;
   }
 
   size_t const LenStop = ((Len - PrimeSize) / PALIGN) * PALIGN;
-  uint8_t const* Block;
-  for (size_t i = 0; i < LenStop; i += PALIGN) {
-    Block = &Data[i];
-    double E = normalizedEntropy(Block, PrimeSize);
-    //printf("%0.4f\n", E);
-    if (E >= 0.8) {
-      // Checks whether we have a prime
-      const auto P = getInteger(Block, PrimeSize);
-      if (isPrime(P)) {
-        if (Primes.insert(P).second) {
-          printf("We found a new prime: %p!\n", Block);
-          dumpHex("Prime", Block, PrimeSize);
-          if (N % P == 0) {
-            printf("PRIME FOUND: this prime divides N!\n");
-            return P;
+  // Visual studio has only support for OpenMP 2.0. We thus can't use #pragma
+  // omp cancel for...
+  bool Found = false;
+  BigIntTy Ret = 0;
+#pragma omp parallel for shared(Found) shared(Ret)
+  for (int64_t i = 0; i <= LenStop; i += PALIGN) {
+    if (!Found) {
+      uint8_t const* Block = &Data[i];
+      const double E = normalizedEntropy(Block, PrimeSize);
+      if (E >= MINIMAL_ENTROPY) {
+        const auto P = getInteger(Block, PrimeSize);
+        if (N % P == 0) {
+#pragma omp critical
+          {
+            Ret = P;
+            Found = true;
           }
         }
       }
     }
   }
+
+  return Ret;
+}
+#endif
+
+static BigIntTy searchPrimes_serial(uint8_t const* Data, size_t const Len, BigIntTy const& N, const size_t PrimeSize)
+{
+  size_t const LenStop = ((Len - PrimeSize) / PALIGN) * PALIGN;
+  for (size_t i = 0; i <= LenStop; i += PALIGN) {
+    uint8_t const* Block = &Data[i];
+    const double E = normalizedEntropy(Block, PrimeSize);
+    if (E >= MINIMAL_ENTROPY) {
+      const auto P = getInteger(Block, PrimeSize);
+      if (N % P == 0) {
+        return P;
+      }
+    }
+  }
+
   return 0;
+}
+
+BigIntTy wkey::searchPrimes(uint8_t const* Data, size_t const Len, BigIntTy const& N, const size_t PrimeSize)
+{
+  if (Len < PrimeSize) {
+    return 0;
+  }
+
+#ifdef HAS_OMP_SUPPORT
+  if (omp_get_max_threads() > 1) {
+    return searchPrimes_omp(Data, Len, N, PrimeSize);
+  }
+#endif
+  return searchPrimes_serial(Data, Len, N, PrimeSize);
 }

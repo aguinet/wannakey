@@ -18,6 +18,13 @@ DISCLAMER
 Updates
 =======
 
+v2.1
+----
+
+* optimization of the prime search process (see TODO).
+* OpenMP version that uses has many core as available to speed-up the process
+* tool that finds whether wannakey's technique has chances to work on a running Windows OS
+
 v2.0
 ----
 
@@ -68,9 +75,15 @@ That's what this software tries to achieve.
 Usage
 =====
 
-You can use the binary in the bin/ folder. It will locate the encryption PID by
-itself. If it can't, you might need to search it by hand and pass it as an
-argument of the ``wannakey.exe`` tool.o
+You can use the binary ``wannakey.exe`` in the bin/ folder. It will locate the
+encryption PID by itself. If it can't, you might need to search it by hand and
+pass it as an argument of the ``wannakey.exe`` tool.
+
+If you have multiple cores, you can use the ``wannakey_omp.exe`` binary. If you
+don't have the ``vcomp140.dll`` on your system, you can copy alongside
+``wannakey_omp.exe`` the version that is present in the ``bin`` directory
+(extracted from the MSVC 2015 C++ runtime). Unfortunately, it doesn't seem
+straightforward to statically link with this library. 
 
 If the key had been succeesfully generated, you will just need to use the
 "Decrypt" button of the malware to decrypt your files!

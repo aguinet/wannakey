@@ -36,10 +36,7 @@ BigIntTy mulInv(BigIntTy a, BigIntTy b);
 BigIntTy getInteger(uint8_t const* const Data, size_t const Len);
 std::vector<uint8_t> getDataFromInteger(BigIntTy const& N);
 
-static bool isPrime(BigIntTy const& n)
-{
-  return boost::multiprecision::miller_rabin_test(n, 40);
-}
+bool isPrime(BigIntTy const& n);
 
 static bool isPrime(uint8_t const* const Data, size_t const Len)
 {

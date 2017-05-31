@@ -28,10 +28,12 @@ std::vector<uint8_t> readFile(const char* path, std::error_code& EC);
 bool fileHasString(const char* path, const char* str);
 uint8_t const* memmem(const uint8_t *haystack, size_t hlen, const uint8_t *needle, size_t nlen);
 
+#ifdef _WIN32
 std::error_code getLastEC();
 std::string getLastErrorMsg();
+#endif
 std::error_code getLastErrno();
 
 } // wkey
 
-#endif WKEY_TOOLS_H
+#endif //WKEY_TOOLS_H

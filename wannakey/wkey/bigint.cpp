@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with wannakey.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <random>
 #include <wkey/bigint.h>
 
 namespace wkey {
@@ -57,6 +58,12 @@ std::vector<uint8_t> getDataFromInteger(BigIntTy const& N)
   std::vector<uint8_t> Ret;
   boost::multiprecision::export_bits(N, std::back_inserter(Ret), 8, false);
   return Ret;
+}
+
+bool isPrime(BigIntTy const& n)
+{
+  static std::mt19937 RandEng(std::random_device{}());
+  return boost::multiprecision::miller_rabin_test(n, 25, RandEng);
 }
 
 } // wkey
