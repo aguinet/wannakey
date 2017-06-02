@@ -111,7 +111,7 @@ static int searchPrimes(HANDLE hProc, uint8_t const* const P, uint8_t const* con
   int Ret = 1;
   ReadFailureCB OnErr = [&](uint8_t const* Buf, const size_t Size, std::error_code const& EC) {
     if (verbose) {
-      std::cerr << "Warning: unable to read memory at " << std::hex << Buf << " for " << std::dec << Size << " bytes: " << EC.message();
+      std::cerr << "Warning: unable to read memory at " << std::hex << &Buf << " for " << std::dec << Size << " bytes: " << EC.message();
     }
     return true;
   };
