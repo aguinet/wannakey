@@ -33,8 +33,8 @@ typedef boost::multiprecision::cpp_int BigIntTy;
 
 void writeIntegerToFile(FILE* f, BigIntTy const& N, uint32_t padSize);
 BigIntTy mulInv(BigIntTy a, BigIntTy b);
-BigIntTy getInteger(uint8_t const* const Data, size_t const Len);
-std::vector<uint8_t> getDataFromInteger(BigIntTy const& N);
+BigIntTy getInteger(uint8_t const* const Data, size_t const Len, bool MsvFirst  = false);
+std::vector<uint8_t> getDataFromInteger(BigIntTy const& N, bool MsvFirst = false);
 
 bool isPrime(BigIntTy const& n);
 

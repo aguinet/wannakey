@@ -45,18 +45,18 @@ BigIntTy mulInv(BigIntTy a, BigIntTy b)
   return x1;
 }
 
-BigIntTy getInteger(uint8_t const* const Data, size_t const Len)
+BigIntTy getInteger(uint8_t const* const Data, size_t const Len, bool MsvFirst /* = false */)
 {
   BigIntTy n;
   boost::multiprecision::import_bits(n,
-      Data, Data + Len, 8, false);
+      Data, Data + Len, 8, MsvFirst);
   return n;
 }
 
-std::vector<uint8_t> getDataFromInteger(BigIntTy const& N)
+std::vector<uint8_t> getDataFromInteger(BigIntTy const& N, bool MsvFirst /* = false */)
 {
   std::vector<uint8_t> Ret;
-  boost::multiprecision::export_bits(N, std::back_inserter(Ret), 8, false);
+  boost::multiprecision::export_bits(N, std::back_inserter(Ret), 8, MsvFirst);
   return Ret;
 }
 

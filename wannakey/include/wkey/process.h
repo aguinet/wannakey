@@ -35,7 +35,7 @@ struct ProcInfo {
 
 typedef std::map<FileID, ProcInfo> MapFilesPID;
 typedef std::function<bool(MEMORY_BASIC_INFORMATION const&)> ValidCb;
-typedef std::function<bool(uint8_t const* Buf, const size_t Data)> MemoryCb;
+typedef std::function<bool(uint8_t const* Buf, const size_t Data, uint8_t const* OrgPtr)> MemoryCb;
 typedef std::function<bool(uint8_t const* Buf, const size_t Data, std::error_code const&)> ReadFailureCB;
 
 MapFilesPID getProcessList();

@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iomanip>
 #include <memory>
+#include <array>
 
 #include <wkey/process.h>
 #include <wkey/tools.h>
@@ -111,27 +112,52 @@ static int searchPrimes(HANDLE hProc, uint8_t const* const P, uint8_t const* con
   int Ret = 1;
   ReadFailureCB OnErr = [&](uint8_t const* Buf, const size_t Size, std::error_code const& EC) {
     if (verbose) {
-      std::cerr << "Warning: unable to read memory at " << std::hex << Buf << " for " << std::dec << Size << " bytes: " << EC.message();
+      std::cerr << "Warning: unable to read memory at " << std::hex << (uintptr_t)Buf << " for " << std::dec << Size << " bytes: " << EC.message();
     }
     return true;
   };
 
+  std::array<uint8_t, SubKeyBytes> Pinv;
+  std::array<uint8_t, SubKeyBytes> Qinv;
+  memcpy(&Pinv[0], P, SubKeyBytes);
+  memcpy(&Qinv[0], Q, SubKeyBytes);
+  std::reverse(std::begin(Pinv), std::end(Pinv));
+  std::reverse(std::begin(Qinv), std::end(Qinv));
+
   auto Err = walkProcessPrivateRWMemory(hProc,
-      [&](uint8_t const* Buf, const size_t Size) {
+    [&](uint8_t const* Buf, const size_t Size, uint8_t const* OrgMem) {
       uint8_t const* SRet = memmem(Buf, Size, &P[0], SubKeyBytes);
-      if (SRet != nullptr && SRet != P) {
-      printf("Found P at %p\n", SRet);
-      Ret = 0;
+      size_t Idx = std::distance(Buf, SRet);
+      uint8_t const* OrgPtr = OrgMem + Idx;
+      if (SRet != nullptr && OrgPtr != P) {
+        printf("Found P at %p\n", OrgPtr);
+        Ret = 0;
       }
       SRet = memmem(Buf, Size, &Q[0], SubKeyBytes);
-      if (SRet != nullptr && SRet != Q) {
-      printf("Found Q at %p\n", SRet);
-      Ret = 0;
+      Idx = std::distance(Buf, SRet);
+      OrgPtr = OrgMem + Idx;
+      if (SRet != nullptr && OrgPtr != Q) {
+        printf("Found Q at %p\n", OrgPtr);
+        Ret = 0;
+      }
+      SRet = memmem(Buf, Size, &Pinv[0], SubKeyBytes);
+      Idx = std::distance(Buf, SRet);
+      OrgPtr = OrgMem + Idx;
+      if (SRet != nullptr && OrgPtr != &Pinv[0]) {
+        printf("Found Pinv at %p\n", OrgPtr);
+        Ret = 0;
+      }
+      SRet = memmem(Buf, Size, &Qinv[0], SubKeyBytes);
+      Idx = std::distance(Buf, SRet);
+      OrgPtr = OrgMem + Idx;
+      if (SRet != nullptr && OrgPtr != &Qinv[0]) {
+        printf("Found Qinv at %p\n", OrgPtr);
+        Ret = 0;
       }
       return true;
-      },
-      &OnErr
-      );
+    },
+    &OnErr
+  );
 
   if (Err) {
     std::cerr << "Error while walking process memory: " << Err.message() << std::endl;
@@ -176,21 +202,26 @@ static int generateKeyAndCheck()
     return 2;
   }
 
-  // We try and involve the less functions that use heap memory here! Do that before calling the "destroy" functions.
-  // Get P and Q, and store them in hexadecimal value. This won't be the value we're looking for!
+  // We try and involve the less functions that use heap memory here! Do that
+  // before calling the "destroy" functions.
   uint8_t P[SubKeyBytes];
   uint8_t Q[SubKeyBytes];
   size_t idx = 8 + 12;
-  if (verbose)
+  if (verbose) {
     dumpHex("N", &keyData[idx], KeyBytes);
+  }
   idx += KeyBytes;
   memcpy(&P[0], &keyData[idx], sizeof(P));
-  if (verbose)
-    dumpHex("P", &keyData[idx], SubKeyBytes);
+  if (verbose) {
+	  dumpHex("P", &keyData[idx], SubKeyBytes);
+	  std::cout << "Entropy P: " << normalizedEntropy(&P[0], sizeof(P)) << std::endl;
+  }
   idx += SubKeyBytes;
   memcpy(&Q[0], &keyData[idx], sizeof(Q));
-  if (verbose)
-    dumpHex("Q", &keyData[idx], SubKeyBytes);
+  if (verbose) {
+	  dumpHex("Q", &keyData[idx], SubKeyBytes);
+	  std::cout << "Entropy Q: " << normalizedEntropy(&P[0], sizeof(Q)) << std::endl;
+  }
   if (verbose) {
     printf("P: %08X\n", P);
     printf("Q: %08X\n", Q);

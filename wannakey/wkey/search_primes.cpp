@@ -26,7 +26,7 @@
 #include <wkey/tools.h>
 
 #define PALIGN 4
-#define MINIMAL_ENTROPY 0.8
+#define MINIMAL_ENTROPY 0.7
 
 using namespace wkey;
 
@@ -48,7 +48,15 @@ static BigIntTy searchPrimes_omp(uint8_t const* Data, size_t const Len, BigIntTy
       uint8_t const* Block = &Data[i];
       const double E = normalizedEntropy(Block, PrimeSize);
       if (E >= MINIMAL_ENTROPY) {
-        const auto P = getInteger(Block, PrimeSize);
+        auto P = getInteger(Block, PrimeSize, false);
+        if (N % P == 0) {
+#pragma omp critical
+          {
+            Ret = P;
+            Found = true;
+          }
+        }
+        P = getInteger(Block, PrimeSize, true);
         if (N % P == 0) {
 #pragma omp critical
           {
@@ -59,6 +67,7 @@ static BigIntTy searchPrimes_omp(uint8_t const* Data, size_t const Len, BigIntTy
       }
     }
   }
+  
 
   return Ret;
 }
@@ -71,7 +80,11 @@ static BigIntTy searchPrimes_serial(uint8_t const* Data, size_t const Len, BigIn
     uint8_t const* Block = &Data[i];
     const double E = normalizedEntropy(Block, PrimeSize);
     if (E >= MINIMAL_ENTROPY) {
-      const auto P = getInteger(Block, PrimeSize);
+      auto P = getInteger(Block, PrimeSize, false);
+      if (N % P == 0) {
+        return P;
+      }
+      P = getInteger(Block, PrimeSize, true);
       if (N % P == 0) {
         return P;
       }

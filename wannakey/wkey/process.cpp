@@ -171,7 +171,7 @@ std::error_code walkProcessMemory(HANDLE hProc, ValidCb const& CbValid, MemoryCb
       std::cerr << "Warning: ReadProcessMemory returned only " << ReadSize << " bytes when asked for " << Size << std::endl;
     }
 
-    if (!Cb(&Buf[0], ReadSize)) {
+    if (!Cb(&Buf[0], ReadSize, (uint8_t const*) MemInfo.BaseAddress)) {
       break;
     }
   }
